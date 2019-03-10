@@ -169,10 +169,27 @@ class TraktUpcomingCalendarSensor(Entity):
                 continue
 
             session = requests.Session()
+            
+            tmdb_id = show_details[0].tmdb
+            api_key = '0eee347e2333d7a97b724106353ca42f'
+    
             try:
-                tmdb_url = session.get('http://api.tmdb.org/3/tv/{}?api_key=0eee347e2333d7a97b724106353ca42f'.format(
-                    str(show_details[0].tmdb)))
-                tmdb_json = tmdb_url.json()
+                if tmdb_id is None:
+                    imdb_url = 'https://api.themoviedb.org/3/find/{}?api_key=' + \
+                        api_key + '&external_source=imdb_id'
+                    imdb_response = session.get(imdb_url.format(str(show_details[0].imdb)))
+                    imdb_json = imdb_response.json()
+                    tmdb_id = imdb_json.get('tv_results')[0]['id']
+
+                    if tmdb_id is None:
+                        tmdb_query = session.get('https://api.themoviedb.org/3/search/tv?api_key=' + \
+                            api_key + '&query=' + show.show.replace(" ", "+"))
+                        query_json = tmdb_query.json()
+                        tmdb_id = query_json.get('results')[0]['id']
+
+                tmdb_url = 'http://api.tmdb.org/3/tv/{}?api_key=' + api_key
+                tmdb_response = session.get(tmdb_url.format(str(tmdb_id)))
+                tmdb_json = tmdb_response.json()
             except requests.exceptions.RequestException as e:
                 _LOGGER.warning('api.themoviedb.org is not responding')
                 return
