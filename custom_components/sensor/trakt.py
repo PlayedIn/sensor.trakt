@@ -192,8 +192,10 @@ class TraktUpcomingCalendarSensor(Entity):
                 'episode': show.title,
                 'number': 'S' + str(show.season) + 'E' + str(show.number),
                 'rating': tmdb_json.get('vote_average', ''),
-                'poster': image_url % ('500', tmdb_json.get('poster_path', '')),
-                'fanart': image_url % ('780', tmdb_json.get('backdrop_path', '')),
+                'poster': image_url % ('500', tmdb_json.get('poster_path', '')) if tmdb_json.get(
+                    'poster_path') is not None else '',
+                'fanart': image_url % ('780', tmdb_json.get('backdrop_path', '')) if tmdb_json.get(
+                    'backdrop_path') is not None else '',
                 'runtime': tmdb_json.get('episode_run_time')[0] if len(tmdb_json.get('episode_run_time', [])) > 0 else '',
                 'studio': tmdb_json.get('networks')[0].get('name', '') if len(tmdb_json.get('networks', [])) > 0 else ''
             }
